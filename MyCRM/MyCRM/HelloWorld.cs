@@ -37,12 +37,18 @@ namespace MyCRM
                 try
                 {
                     // Plug-in business logic goes here.  
+                    var firstName = string.Empty;
+                    var lastName = string.Empty;
 
                     // Read from atttribute values
-                    // Return first name
-                    string firstName = entity.Attributes["firstname"].ToString();
+                    if (entity.Attributes.Contains("firstname"))
+                    {
+                        // Return first name
+                        firstName = entity.Attributes["firstname"].ToString();
+                    }
+                    
                     // Retrun last name
-                    string lastName = entity.Attributes["lastname"].ToString();
+                    lastName = entity.Attributes["lastname"].ToString();
 
                     // Assign data to attributes
                     var welcomeText = $"Hello World {firstName} {lastName}";
