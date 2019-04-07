@@ -32,13 +32,15 @@ namespace MyCRM
             if (context.InputParameters.Contains("Target") && context.InputParameters["Target"] is Entity)
             {
                 // Obtain the target entity from the input parameters.  
-                Entity entity = (Entity)context.InputParameters["Target"];
+                Entity contact = (Entity)context.InputParameters["Target"];
 
 
                 try
                 {
                     // Plug-in business logic goes here.  
-                  
+                    Entity taskRecord = new Entity("task");
+                    service.Create(taskRecord);
+                    taskRecord.Attributes.Add("", "");
                 }
 
                 catch (FaultException<OrganizationServiceFault> ex)
