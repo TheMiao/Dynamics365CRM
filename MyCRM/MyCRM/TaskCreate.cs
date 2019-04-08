@@ -39,8 +39,23 @@ namespace MyCRM
                 {
                     // Plug-in business logic goes here.  
                     Entity taskRecord = new Entity("task");
-                    service.Create(taskRecord);
-                    taskRecord.Attributes.Add("", "");
+                    
+                    // Single line of text
+                    taskRecord.Attributes.Add("subject", "Follow up");
+                    taskRecord.Attributes.Add("description", "Please follow up with contact.");
+
+                    // Date
+                    taskRecord.Attributes.Add("scheduledend", DateTime.Now.AddDays(2));
+
+                    // Option set value as "High"
+                    taskRecord.Attributes.Add("prioritycode", new OptionSetValue(2));
+
+                    // Parent record or Look up 
+                    // You should link your assignment(Task) to the specific contact
+                    // contact.Id can only be used in the Post-validation Operation due to pre-validation will not have the ID yet and it will cost the error.
+                    // taskRecord.Attributes.Add("regardingobjectid", new EntityReference("contact", contact.Id));
+                    taskRecord.Attributes.Add("regardingobjectid", contact.ToEntityReference());
+                    Guid taskGuid = service.Create(taskRecord);
                 }
 
                 catch (FaultException<OrganizationServiceFault> ex)
