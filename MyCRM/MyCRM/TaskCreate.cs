@@ -52,7 +52,7 @@ namespace MyCRM
 
                     // Parent record or Look up 
                     // You should link your assignment(Task) to the specific contact
-                    // contact.Id can only be used in the Post-validation Operation due to pre-validation will not have the ID yet and it will cost the error.
+                    // contact.Id can ONLY be used in the Post-validation Operation due to pre-validation will not have the ID yet and it will cost the error.
                     // taskRecord.Attributes.Add("regardingobjectid", new EntityReference("contact", contact.Id));
                     taskRecord.Attributes.Add("regardingobjectid", contact.ToEntityReference());
                     Guid taskGuid = service.Create(taskRecord);
