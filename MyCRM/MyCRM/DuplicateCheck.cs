@@ -44,13 +44,14 @@ namespace MyCRM
                     {
                         email = contact.Attributes["emailaddress1"].ToString();
 
+                        // Now we need use query to retrieve email
                         // select * from contact where emailaddress1 == 'email'
 
-                        QueryExpression query = new QueryExpression("contact");
+                        var query = new QueryExpression("contact");
                         query.ColumnSet = new ColumnSet(new string[] { "emailaddress1" });
                         query.Criteria.AddCondition("emailaddress1", ConditionOperator.Equal, email);
 
-                        EntityCollection collection = service.RetrieveMultiple(query);
+                        var collection = service.RetrieveMultiple(query);
 
                         if (collection.Entities.Count > 0)
                         {
