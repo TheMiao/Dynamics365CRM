@@ -42,11 +42,14 @@ namespace MyPlugins
                 {
                     // Plug-in business logic goes here.  
 
+                    // This is modified business phone number
                     string modifiedBusinessPhone = entity.Attributes["telephone1"].ToString();
 
+                    // Retrieve original business phone number
                     Entity preImage = (Entity)context.PreEntityImages["PreImage"];
                     string oldBusinessPhone = preImage.Attributes["telephone1"].ToString();
 
+                    // Display the information in the error log
                     throw new InvalidPluginExecutionException("Phone number is changed from" + oldBusinessPhone + " to " + modifiedBusinessPhone);
                 }
 
