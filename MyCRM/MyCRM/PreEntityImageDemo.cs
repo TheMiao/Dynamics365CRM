@@ -47,10 +47,10 @@ namespace MyPlugins
 
                     // Retrieve original business phone number
                     Entity preImage = (Entity)context.PreEntityImages["PreImage"];
-                    string oldBusinessPhone = preImage.Attributes["telephone1"].ToString();
+                    string originalBusinessPhone = preImage.Attributes["telephone1"].ToString();
 
                     // Display the information in the error log
-                    throw new InvalidPluginExecutionException("Phone number is changed from" + oldBusinessPhone + " to " + modifiedBusinessPhone);
+                    throw new InvalidPluginExecutionException("Phone number is changed from" + originalBusinessPhone + " to " + modifiedBusinessPhone);
                 }
 
                 catch (FaultException<OrganizationServiceFault> ex)
