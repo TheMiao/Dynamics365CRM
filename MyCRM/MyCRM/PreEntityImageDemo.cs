@@ -40,7 +40,14 @@ namespace MyPlugins
 
                 try
                 {
-                    
+                    // Plug-in business logic goes here.  
+
+                    string modifiedBusinessPhone = entity.Attributes["telephone1"].ToString();
+
+                    Entity preImage = (Entity)context.PreEntityImages["PreImage"];
+                    string oldBusinessPhone = preImage.Attributes["telephone1"].ToString();
+
+                    throw new InvalidPluginExecutionException("Phone number is changed from" + oldBusinessPhone + " to " + modifiedBusinessPhone);
                 }
 
                 catch (FaultException<OrganizationServiceFault> ex)
