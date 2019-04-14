@@ -58,8 +58,6 @@ namespace MyCRM
                             throw new InvalidPluginExecutionException("Contact with email already exists!!!");
                         }
                     }
-
-
                 }
 
                 catch (FaultException<OrganizationServiceFault> ex)
