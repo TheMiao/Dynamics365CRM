@@ -51,6 +51,7 @@ namespace MyPlugins
 
                     
                     Entity preImage = (Entity)context.PreEntityImages["PreImage"];
+                    Entity postImage = (Entity)context.PostEntityImages["PostImage"];
 
                     // Retrieve original business phone number
                     string originalBusinessPhone = preImage.Attributes["telephone1"].ToString();
