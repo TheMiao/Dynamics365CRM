@@ -42,11 +42,17 @@ namespace MyPlugins
                 {
                     // Plug-in business logic goes here.  
 
+
+                    //Pre and post entity images
+                    // Snapshots of the primary entity's attributes from database before (pre) and after (post) the core platfomr operation.
+
                     // This is modified business phone number
                     string modifiedBusinessPhone = entity.Attributes["telephone1"].ToString();
 
-                    // Retrieve original business phone number
+                    
                     Entity preImage = (Entity)context.PreEntityImages["PreImage"];
+
+                    // Retrieve original business phone number
                     string originalBusinessPhone = preImage.Attributes["telephone1"].ToString();
 
                     // Display the information in the error log
