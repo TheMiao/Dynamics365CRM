@@ -36,6 +36,12 @@ namespace MyCRM
 
                 try
                 {
+                    /*
+                     * SharedVariabls can share the variabls to different plugins
+                     * SharedVariabls will only work under same pipeline
+                     * 
+                     */
+
                     // How to setup SharedVariables value
                     context.SharedVariables.Add("Key1", "Some Info");
 
