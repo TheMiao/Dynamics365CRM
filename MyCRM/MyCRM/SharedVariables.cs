@@ -36,8 +36,10 @@ namespace MyCRM
 
                 try
                 {
+                    // How to setup SharedVariables value
                     context.SharedVariables.Add("Key1", "Some Info");
 
+                    // How to retrieve SharedVariables value
                     string key = context.SharedVariables["Key1"].ToString();
 
                 }
