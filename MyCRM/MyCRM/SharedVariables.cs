@@ -36,7 +36,10 @@ namespace MyCRM
 
                 try
                 {
-                    
+                    context.SharedVariables.Add("Key1", "Some Info");
+
+                    string key = context.SharedVariables["Key1"].ToString();
+
                 }
 
                 catch (FaultException<OrganizationServiceFault> ex)
