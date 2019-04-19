@@ -26,6 +26,7 @@ namespace MyCRM
             IOrganizationServiceFactory serviceFactory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
             IOrganizationService service = serviceFactory.CreateOrganizationService(context.UserId);
 
+            IOrganizationService adminService = serviceFactory.CreateOrganizationService(new Guid());
 
 
             // The InputParameters collection contains all the data passed in the message request.  
@@ -60,6 +61,11 @@ namespace MyCRM
                     // taskRecord.Attributes.Add("regardingobjectid", new EntityReference("contact", contact.Id));
                     taskRecord.Attributes.Add("regardingobjectid", contact.ToEntityReference());
                     Guid taskGuid = service.Create(taskRecord);
+
+                    // Inpersonation in Plugins
+                    adminService.Create(taskRecord);
+
+
                 }
 
                 catch (FaultException<OrganizationServiceFault> ex)
