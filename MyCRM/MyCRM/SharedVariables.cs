@@ -1,15 +1,14 @@
-﻿using Microsoft.Xrm.Sdk;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xrm.Sdk;
 using System.ServiceModel;
-
 
 namespace MyCRM
 {
-    public class TaskCreate : IPlugin
+    public class SharedVariables : IPlugin
     {
         public void Execute(IServiceProvider serviceProvider)
         {
@@ -26,45 +25,28 @@ namespace MyCRM
             IOrganizationServiceFactory serviceFactory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
             IOrganizationService service = serviceFactory.CreateOrganizationService(context.UserId);
 
-            IOrganizationService adminService = serviceFactory.CreateOrganizationService(new Guid());
 
 
             // The InputParameters collection contains all the data passed in the message request.  
             if (context.InputParameters.Contains("Target") && context.InputParameters["Target"] is Entity)
             {
                 // Obtain the target entity from the input parameters.  
-                Entity contact = (Entity)context.InputParameters["Target"];
+                Entity entity = (Entity)context.InputParameters["Target"];
 
 
                 try
                 {
-                    // **************************************
-                    // This is PostOpeartion, when register the new step, must pick PostOperation
-                    // **************************************
+                    /*
+                     * SharedVariabls can share the variabls to different plugins
+                     * SharedVariabls will only work under same pipeline
+                     * 
+                     */
 
-                    // Plug-in business logic goes here.  
-                    Entity taskRecord = new Entity("task");
-                    
-                    // Single line of text
-                    taskRecord.Attributes.Add("subject", "Follow up");
-                    taskRecord.Attributes.Add("description", "Please follow up with contact.");
+                    // How to setup SharedVariables value
+                    context.SharedVariables.Add("Key1", "Some Info");
 
-                    // Date
-                    taskRecord.Attributes.Add("scheduledend", DateTime.Now.AddDays(2));
-
-                    // Option set value as "High"
-                    taskRecord.Attributes.Add("prioritycode", new OptionSetValue(2));
-
-                    // Parent record or Look up 
-                    // You should link your assignment(Task) to the specific contact
-                    // contact information can ONLY be used in the Post-validation Operation due to pre-validation will not have the ID yet and it will cost the error.
-                    // taskRecord.Attributes.Add("regardingobjectid", new EntityReference("contact", contact.Id));
-                    taskRecord.Attributes.Add("regardingobjectid", contact.ToEntityReference());
-                    Guid taskGuid = service.Create(taskRecord);
-
-                    // Inpersonation in Plugins
-                    adminService.Create(taskRecord);
-
+                    // How to retrieve SharedVariables value
+                    string key = context.SharedVariables["Key1"].ToString();
 
                 }
 
