@@ -31,7 +31,7 @@ namespace MyPlugins
             if (context.InputParameters.Contains("Target") && context.InputParameters["Target"] is Entity)
             {
                 // Obtain the target entity from the input parameters.  
-                Entity entity = (Entity)context.InputParameters["Target"];
+                var entity = (Entity)context.InputParameters["Target"];
 
 
                 try
@@ -43,10 +43,10 @@ namespace MyPlugins
                     // Snapshots of the primary entity's attributes from database before (pre) and after (post) the core platfomr operation.
 
                     // This is modified business phone number
-                    string modifiedBusinessPhone = entity.Attributes["telephone1"].ToString();
+                    var modifiedBusinessPhone = entity.Attributes["telephone1"].ToString();
 
                     // Retrieve preEntity Images
-                    Entity preImage = (Entity)context.PreEntityImages["PreImage"];
+                    var preImage = (Entity)context.PreEntityImages["PreImage"];
 
                     // Normally we don't retrieve post entity images with following reason
                     // 1. After the postOperation, we are on the current situation modifed data
@@ -54,7 +54,7 @@ namespace MyPlugins
                     // Entity postImage = (Entity)context.PostEntityImages["PostImage"];
 
                     // Retrieve original business phone number
-                    string originalBusinessPhone = preImage.Attributes["telephone1"].ToString();
+                    var originalBusinessPhone = preImage.Attributes["telephone1"].ToString();
 
                     // Display the information in the error log
                     throw new InvalidPluginExecutionException("Phone number is changed from" + originalBusinessPhone + " to " + modifiedBusinessPhone);
