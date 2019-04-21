@@ -49,9 +49,13 @@ namespace MyPlugins
                     // This is modified business phone number
                     string modifiedBusinessPhone = entity.Attributes["telephone1"].ToString();
 
-                    
+                    // Retrieve preEntity Images
                     Entity preImage = (Entity)context.PreEntityImages["PreImage"];
-                    Entity postImage = (Entity)context.PostEntityImages["PostImage"];
+
+                    // Normally we don't retrieve post entity images with following reason
+                    // 1. After the postOperation, we are on the current situation modifed data
+                    // 2. When retrieve the postEntityImages, due to it is not created, the entity will be null.
+                    // Entity postImage = (Entity)context.PostEntityImages["PostImage"];
 
                     // Retrieve original business phone number
                     string originalBusinessPhone = preImage.Attributes["telephone1"].ToString();
