@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Xrm.Sdk;
 using System.ServiceModel;
 
-namespace MyPlugins
+namespace MyCRM
 {
     public class PreEntityImageDemo : IPlugin
     {
