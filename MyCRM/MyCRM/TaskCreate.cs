@@ -26,6 +26,7 @@ namespace MyCRM
             IOrganizationServiceFactory serviceFactory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
             IOrganizationService service = serviceFactory.CreateOrganizationService(context.UserId);
 
+            // This is for the impersonation
             IOrganizationService adminService = serviceFactory.CreateOrganizationService(new Guid());
 
 
