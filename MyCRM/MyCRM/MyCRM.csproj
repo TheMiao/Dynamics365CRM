@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccountUpdate.cs" />
+    <Compile Include="ContextDepths.cs" />
     <Compile Include="DuplicateCheck.cs" />
     <Compile Include="HelloWorld.cs" />
     <Compile Include="PreEntityImageDemo.cs" />
