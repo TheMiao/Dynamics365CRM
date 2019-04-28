@@ -12,6 +12,9 @@ namespace MyCRM
     {
         public string UnSecureConfig { get; set; }
         public string SecureConfig { get; set; }
+
+        // Constructor can retrieve the secure & unSecure configuration data
+        // Please config in the plugin registeration tool
         public HelloWorld(string unSecureConfig, string secureConfig)
         {
             this.UnSecureConfig = unSecureConfig;
