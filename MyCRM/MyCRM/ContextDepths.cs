@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MyCRM
 {
-    public class ContextDepths
+    public class ContextDepths : IPlugin
     {
         public void Execute(IServiceProvider serviceProvider)
         {
@@ -39,13 +39,15 @@ namespace MyCRM
                     tracingService.Trace(context.Depth.ToString());
 
                     if (context.Depth > 1)
+                    {
                         return;
+                    }
 
                     // In case the user removes the value 
                     if (account.Attributes["revenue"] != null)
                     {
                         var revenue = ((Money)account.Attributes["revenue"]).Value;
-                        revenue = Math.Round(revenue, 1);
+                        revenue += 100;
 
                         account.Attributes["revenue"] = new Money(revenue);
                     }
