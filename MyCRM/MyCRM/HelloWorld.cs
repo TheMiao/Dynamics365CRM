@@ -10,6 +10,16 @@ namespace MyCRM
 {
     public class HelloWorld : IPlugin
     {
+        public string UnSecureConfig { get; set; }
+        public string SecureConfig { get; set; }
+
+        // Constructor can retrieve the secure & unSecure configuration data
+        // Please config in the plugin registeration tool
+        public HelloWorld(string unSecureConfig, string secureConfig)
+        {
+            this.UnSecureConfig = unSecureConfig;
+            this.SecureConfig = secureConfig;
+        }
         public void Execute(IServiceProvider serviceProvider)
         {
             // Extract the tracing service for use in debugging sandboxed plug-ins.  
@@ -33,7 +43,7 @@ namespace MyCRM
                 // Obtain the target entity from the input parameters.  
                 Entity entity = (Entity)context.InputParameters["Target"];
 
-                
+
                 try
                 {
                     // Plug-in business logic goes here.  
@@ -46,7 +56,7 @@ namespace MyCRM
                         // Return first name
                         firstName = entity.Attributes["firstname"].ToString();
                     }
-                    
+
                     // Retrun last name
                     lastName = entity.Attributes["lastname"].ToString();
 
