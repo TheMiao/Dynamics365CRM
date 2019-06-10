@@ -8,6 +8,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyCustomWorkflows", "MyCustomWorkflows\MyCustomWorkflows.csproj", "{2E8CA1D4-291B-4E93-B4CC-8A92CF373318}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client Scripts", "Client Scripts", "{E39E64AA-F0A1-435F-BCF3-E10B2050B514}"
+	ProjectSection(SolutionItems) = preProject
+		ContactScripts.js = ContactScripts.js
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
