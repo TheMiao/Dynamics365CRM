@@ -9,3 +9,11 @@ function ContactSave() {
 function EmailOnChange() {
     alert("This is OnChange event of email attribute");
 }
+
+function DisplayHelloWorld(executionContext) {
+    var formContext = executionContext.getFormContext();
+
+    var firstName = formContext.getAttribute("firstname").getValue();
+
+    alert("Hello World " + firstName);
+}
