@@ -40,8 +40,14 @@ namespace MyCFS
                 try
                 {
                     // Plug-in business logic goes here.  
+                    var description = string.Empty;
 
+                    if(entity.Attributes.Contains("msdyn_description"))
+                    {
+                        description = entity.Attributes["msdyn_description"].ToString();
+                    }
 
+                    entity.Attributes.Add("msdyn_description", description + " Hello World from Plugin");
 
                 }
 
