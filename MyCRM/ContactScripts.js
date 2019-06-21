@@ -42,3 +42,19 @@ function CreateEntity(clientURL, entityType, entityData) {
     };
     req.send(JSON.stringify(entityData));
 }
+
+// Basic Create an account entity using Web API
+function BasicCreateAccount() {
+    var entityType = "accounts";
+    var clientURL = Xrm.Page.context.getClientUrl();
+
+    var account = {};
+    account["name"] = "Basic Create Sample Account";
+    account["accountnumber"] = "xxxxx";
+    account["fax"] = "xxxxx";
+
+    // Set the exsiting contact id to the account primary contact id to associate the contact entity.
+    account["xxxx@xxxx.com"] = "/contacts(GUID)";
+
+    CreateEntity(clientURL, entityType, account);
+}
