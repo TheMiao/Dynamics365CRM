@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xrm.Sdk;
 using System.ServiceModel;
+using System.Net.Http;
+using Microsoft.Xrm.Sdk.Messages;
 
 namespace MyCFS
 {
@@ -39,16 +41,35 @@ namespace MyCFS
 
                 try
                 {
-                    // Plug-in business logic goes here.  
-                    var description = string.Empty;
+                    // var deviceId = entity.Attributes["msdyn_deviceid"].ToString();
+                    var alertId =  entity.Attributes["msdyn_iotalertid"].ToString();
 
-                    if(entity.Attributes.Contains("msdyn_description"))
-                    {
-                        description = entity.Attributes["msdyn_description"].ToString();
-                    }
+                    Entity newCommand = new Entity("msdyn_iotdevicecommand");
+                    newCommand.Attributes.Add("msdyn_iotdevicecommandid", Guid.NewGuid().ToString());
+                    //newCommand.Attributes.Add("_msdyn_parentalert_value", deviceId);
+                    // newCommand.Attributes.Add("_msdyn_parentalert_value", alertId);
+                    newCommand.Attributes.Add("msdyn_name", "Hello World from Plugin");
+                    // newCommand.Attributes.Add("_createdby_value	", "7dcd4bcc-e37a-e911-a83a-000d3a07fbb4");
+                    newCommand.Attributes.Add("statecode", 0);
+                    newCommand.Attributes.Add("statuscode", 1);
+                    newCommand.Attributes.Add("msdyn_deviceid", "Ava-Device-05");
+                    newCommand.Attributes.Add("versionnumber", 1234567);
+                    newCommand.Attributes.Add("createdon", DateTime.Now);
+                    newCommand.Attributes.Add("modifiedon", DateTime.Now);
+                    newCommand.Attributes.Add("msdyn_message", "{\"CommandName\":\"Reset Thermostat\",\"Parameters\":\"\"}");
+                    newCommand.Attributes.Add("msdyn_commandstatus", 192350000);
+                    newCommand.Attributes.Add("msdyn_sendtoallconnecteddevices", 0);
+                    // newCommand.Attributes.Add("_owningbusinessunit_value", "33248697-8a79-e911-a9a5-000d3aa37759");
+                    // newCommand.Attributes.Add("_modifiedonbehalfby_value", "7dcd4bcc-e37a-e911-a83a-000d3a07fbb4");
+                    //newCommand.Attributes.Add("_msdyn_command_value", "f5a0898e-018c-e911-a841-000d3a07f3d7");
+                    //newCommand.Attributes.Add("_ownerid_value", "7dcd4bcc-e37a-e911-a83a-000d3a07fbb4");
+                    //newCommand.Attributes.Add("_owninguser_value", "7dcd4bcc-e37a-e911-a83a-000d3a07fbb4");
+                    // newCommand.Attributes.Add("_modifiedby_value", "7dcd4bcc-e37a-e911-a83a-000d3a07fbb4");
 
-                    entity.Attributes.Add("msdyn_description", description + " Hello World from Plugin");
 
+                    //service.Create(newCommand);
+                    CreateRequest createRequest = new CreateRequest();
+                    createRequest.Target = newCommand;
                 }
 
                 catch (FaultException<OrganizationServiceFault> ex)
@@ -59,7 +80,6 @@ namespace MyCFS
                 catch (Exception ex)
                 {
                     tracingService.Trace("MyPlugin: {0}", ex.ToString());
-                    throw;
                 }
             }
         }
