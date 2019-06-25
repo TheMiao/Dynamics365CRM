@@ -15,8 +15,9 @@ namespace MyCFSWorkflow
         [Input("Key")]
         public InArgument<string> Key { get; set; }
 
+        [ReferenceTarget("msdyn_iotalert")]
         [Output("IoTAlertId")]
-        public OutArgument<Entity> IoTAlertId { get; set; }
+        public OutArgument<EntityReference> IoTAlertId { get; set; }
 
         protected override void Execute(CodeActivityContext executionContext)
         {
@@ -43,23 +44,29 @@ namespace MyCFSWorkflow
                 // retrieve the configuration in the cfsdemo_cfs_configuration list
                 // *********************************** //
                 // Input custom entity logical name
-                QueryByAttribute query = new QueryByAttribute("cfsdemo_cfs_configuration");
-                // Query Condition, input value logical name
-                query.ColumnSet = new ColumnSet(new string[] { "cfsdemo_avacfsiotdevicecommandid" });
-                query.AddAttributeValue("cfsdemo_name", key);
+                //QueryByAttribute query = new QueryByAttribute("cfsdemo_cfs_configuration");
+                //// Query Condition, input value logical name
+                //query.ColumnSet = new ColumnSet(new string[] { "cfsdemo_avacfsiotdevicecommandid" });
+                //query.AddAttributeValue("cfsdemo_name", key);
 
-                EntityCollection collection = service.RetrieveMultiple(query);
+                //EntityCollection collection = service.RetrieveMultiple(query);
 
-                if (collection.Entities.Count != 1)
-                {
-                    tracingService.Trace("Something is wrong with configuration");
-                }
+                //if (collection.Entities.Count != 1)
+                //{
+                //    tracingService.Trace("Something is wrong with configuration");
+                //}
+
+                //Entity config = collection.Entities.FirstOrDefault();
+                //tracingService.Trace(config.Attributes["cfsdemo_avacfsiotdevicecommandid"].ToString());
+
                 // *********************************** //
 
-                Entity config = collection.Entities.FirstOrDefault();
 
-                tracingService.Trace(config.Attributes["cfsdemo_avacfsiotdevicecommandid"].ToString());
                 //IoTAlertId.Set(executionContext, alertId);
+                //Update Record by using Custom Assembly output parameter
+                var iotAlertRef = new EntityReference("msdyn_iotalert", new Guid(alertId));
+                iotAlertRef.Name = "Hello World From Workflow";
+                IoTAlertId.Set(executionContext, iotAlertRef);
             }
             
         }
