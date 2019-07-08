@@ -17,3 +17,15 @@ function DisplayHelloWorld(executionContext) {
 
     alert("Hello World " + firstName);
 }
+
+function RetrieveLookUpValue() {
+    var lookupObj = Xrm.Page.getAttribute("xm_productname"); //Check for Lookup Object
+    if (lookupObj != null) {
+        var lookupObjValue = lookupObj.getValue();//Check for Lookup Value
+        if (lookupObjValue != null) {
+            console.log("lookupEntityType" + lookupObjValue[0].xm_productcoding);
+            console.log("lookupRecordGuid" + lookupObjValue[0].xm_productmodel);
+            console.log("lookupRecordName" + lookupObjValue[0].name);
+        }
+    }
+}
