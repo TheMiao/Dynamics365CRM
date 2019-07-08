@@ -5,6 +5,14 @@ var Sdk = window.Sdk || {};
         this.formOnLoad = function (executionContext) {
         };
 
+        this.formOnSave = function (executionContext) {
+            var eventArgs = executionContext.getEventArgs();
+            if (eventArgs.getSaveMode() == 70 || eventArgs.getSaveMode() == 2) {
+                eventArgs.preventDefault();
+            }
+        };
+
+
         this.MailPhoneOnChange = function (executionContext) {
             var formContext = executionContext.getFormContext();
             var phoneNumber = formContext.getAttribute("telephone1").getValue();
