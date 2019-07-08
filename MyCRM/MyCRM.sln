@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.106
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28922.388
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyCRM", "MyCRM\MyCRM.csproj", "{8F7B1A28-E5B7-4085-9E2C-80E6B5EA9CA5}"
 EndProject
@@ -9,6 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyCustomWorkflows", "MyCust
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client Scripts", "Client Scripts", "{E39E64AA-F0A1-435F-BCF3-E10B2050B514}"
 	ProjectSection(SolutionItems) = preProject
+		AccountScripts.js = AccountScripts.js
 		ContactScripts.js = ContactScripts.js
 		UsefulFunctions.js = UsefulFunctions.js
 	EndProjectSection
