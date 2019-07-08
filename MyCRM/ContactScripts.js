@@ -18,6 +18,18 @@ function DisplayHelloWorld(executionContext) {
     alert("Hello World " + firstName);
 }
 
+// Converting functions to Namespace Notation
+var Sdk = window.Sdk || {};
+(
+    function () {
+        this.formOnLoad = function (executionContext) {
+            var formContext = executionContext.getFormContext();
+            var firstName = formContext.getAttribute("firstname").getValue();
+            alert("Hello World " + firstName);
+        };
+    }
+).call(Sdk);
+
 function RetrieveLookUpValue() {
     var lookupObj = Xrm.Page.getAttribute("xm_productname"); //Check for Lookup Object
     if (lookupObj != null) {
