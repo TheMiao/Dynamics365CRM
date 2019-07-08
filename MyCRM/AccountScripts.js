@@ -11,10 +11,13 @@ var Sdk = window.Sdk || {};
 
             var expression = /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/;
             if (!expression.test(phoneNumber)) {
-                formContext.getControl("telephone1").setNotification("The phone number entered should use correct format","telephonemsg");
+                // 显示field 和 form的 notification
+                formContext.getControl("telephone1").setNotification("The phone number entered should use correct format", "telephonemsg");
+                // Form message 内容， 显示icon， form message的 id
                 formContext.ui.setFormNotification("Info message", "INFO", "formoti1");
 
             } else {
+                // 清理field 和 from 的notification
                 formContext.getControl("telephone1").clearNotification("telephonemsg");
                 formContext.ui.clearFormNotification("formoti1");
             }
