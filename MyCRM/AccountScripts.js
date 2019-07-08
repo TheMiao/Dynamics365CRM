@@ -9,9 +9,14 @@ var Sdk = window.Sdk || {};
             var formContext = executionContext.getFormContext();
             var phoneNumber = formContext.getAttribute("telephone1").getValue();
 
-            var expression = new RegExp("/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im");
+            var expression = /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/;
             if (!expression.test(phoneNumber)) {
-                alert("The phone number entered should use correct format");
+                formContext.getControl("telephone1").setNotification("The phone number entered should use correct format","telephonemsg");
+                formContext.ui.setFormNotification("Info message", "INFO", "formoti1");
+
+            } else {
+                formContext.getControl("telephone1").clearNotification("telephonemsg");
+                formContext.ui.clearFormNotification("formoti1");
             }
         };
     }
