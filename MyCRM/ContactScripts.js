@@ -27,6 +27,15 @@ var Sdk = window.Sdk || {};
             var firstName = formContext.getAttribute("firstname").getValue();
             alert("Hello World " + firstName);
         };
+
+        this.shippingMethodOnChange = function (executionContext) {
+            var formContext = executionContext.getFormContext();
+            if (formContext.getAttribute("address1_shippingmethodcode").getText() === "FedEx") {
+                formContext.getControl("address1_freighttermscode").setDisabled(true);
+            } else {
+                formContext.getControl("address1_freighttermscode").setDisabled(false);
+            }
+        }
     }
 ).call(Sdk);
 
