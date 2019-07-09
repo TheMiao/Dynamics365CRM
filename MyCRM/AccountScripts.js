@@ -3,6 +3,19 @@ var Sdk = window.Sdk || {};
 (
     function () {
         this.formOnLoad = function (executionContext) {
+            var formContext = executionContext.getFormContext();
+
+            var formType = formContext.ui.getFormType();
+
+            if (formType == 1) {
+                formContext.ui.setFormNotification("User is creating account ", "Info", "notification1");
+
+            } else if (formType == 2) {
+                formContext.ui.setFormNotification("User is opening account", "Info", "notification1");
+
+            } else if (formType == 3) {
+                formContext.ui.setFormNotification("User doesn't have permission to edit the record", "Info", "notification1");
+            }
         };
 
         this.formOnSave = function (executionContext) {
