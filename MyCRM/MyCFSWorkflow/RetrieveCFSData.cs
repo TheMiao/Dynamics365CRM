@@ -35,7 +35,7 @@ namespace MyCFSWorkflow
                 Entity iotAlert = (Entity)context.InputParameters["Target"];
                 var alertId = iotAlert.Attributes["msdyn_iotalertid"].ToString();
 
-                var key = Key.Get(executionContext);
+                // var key = Key.Get(executionContext);
 
                 // Get data from Configuraton Entity
                 // Call organization web service
@@ -57,7 +57,7 @@ namespace MyCFSWorkflow
                 //}
 
                 //Entity config = collection.Entities.FirstOrDefault();
-                //tracingService.Trace(config.Attributes["cfsdemo_avacfsiotdevicecommandid"].ToString());
+                // tracingService.Trace(config.Attributes["cfsdemo_avacfsiotdevicecommandid"].ToString());
 
                 // *********************************** //
 
@@ -67,8 +67,8 @@ namespace MyCFSWorkflow
                 var iotAlertRef = new EntityReference("msdyn_iotalert", new Guid(alertId));
                 iotAlertRef.Name = "Hello World From Workflow";
                 IoTAlertId.Set(executionContext, iotAlertRef);
+                tracingService.Trace(iotAlertRef.Name,iotAlertRef);
             }
-            
         }
     }
 }
