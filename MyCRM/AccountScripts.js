@@ -3,6 +3,9 @@ var Sdk = window.Sdk || {};
 (
     function () {
         this.formOnLoad = function (executionContext) {
+
+            Helper.DoSomething();
+
             var formContext = executionContext.getFormContext();
 
             var formType = formContext.ui.getFormType();
