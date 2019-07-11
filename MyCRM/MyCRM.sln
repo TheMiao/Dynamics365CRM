@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client Scripts", "Client Sc
 	ProjectSection(SolutionItems) = preProject
 		AccountScripts.js = AccountScripts.js
 		ContactScripts.js = ContactScripts.js
+		GlobalHelper.js = GlobalHelper.js
+		MyHTML.html = MyHTML.html
 		UsefulFunctions.js = UsefulFunctions.js
 	EndProjectSection
 EndProject
