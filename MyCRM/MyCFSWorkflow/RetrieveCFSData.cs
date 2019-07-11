@@ -19,6 +19,9 @@ namespace MyCFSWorkflow
         [Output("IoTAlertId")]
         public OutArgument<EntityReference> IoTAlertId { get; set; }
 
+        [Output("CustomerAssetsId")]
+        public OutArgument<string> CustomerAssetsId { get; set; }
+
         protected override void Execute(CodeActivityContext executionContext)
         {
             //Create the tracing service
@@ -33,41 +36,18 @@ namespace MyCFSWorkflow
             {
                 // Obtain the target entity from the input parameters.  
                 Entity iotAlert = (Entity)context.InputParameters["Target"];
-                var alertId = iotAlert.Attributes["msdyn_iotalertid"].ToString();
 
-                // var key = Key.Get(executionContext);
-
-                // Get data from Configuraton Entity
-                // Call organization web service
-
-
-                // retrieve the configuration in the cfsdemo_cfs_configuration list
-                // *********************************** //
-                // Input custom entity logical name
-                //QueryByAttribute query = new QueryByAttribute("cfsdemo_cfs_configuration");
-                //// Query Condition, input value logical name
-                //query.ColumnSet = new ColumnSet(new string[] { "cfsdemo_avacfsiotdevicecommandid" });
-                //query.AddAttributeValue("cfsdemo_name", key);
-
-                //EntityCollection collection = service.RetrieveMultiple(query);
-
-                //if (collection.Entities.Count != 1)
-                //{
-                //    tracingService.Trace("Something is wrong with configuration");
-                //}
-
-                //Entity config = collection.Entities.FirstOrDefault();
-                // tracingService.Trace(config.Attributes["cfsdemo_avacfsiotdevicecommandid"].ToString());
-
-                // *********************************** //
-
-
-                //IoTAlertId.Set(executionContext, alertId);
                 //Update Record by using Custom Assembly output parameter
+                var alertId = iotAlert.Attributes["msdyn_iotalertid"].ToString();
                 var iotAlertRef = new EntityReference("msdyn_iotalert", new Guid(alertId));
                 iotAlertRef.Name = "Hello World From Workflow";
                 IoTAlertId.Set(executionContext, iotAlertRef);
-                tracingService.Trace(iotAlertRef.Name,iotAlertRef);
+                tracingService.Trace(iotAlertRef.Name, iotAlertRef);
+
+
+                // Retrieve CustomerAssetsId
+                var customerAssetsId = iotAlert.Attributes["msdyn_CustomerAsset"].ToString();
+                CustomerAssetsId.Set(executionContext, customerAssetsId);
             }
         }
     }
