@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Sdk.Workflow;
 using System;
 using System.Activities;
@@ -8,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyCFSWorkflow
+namespace CFSWorkFlow
 {
     public class RetrieveCFSData : CodeActivity
     {
@@ -19,8 +18,8 @@ namespace MyCFSWorkflow
         [Output("IoTAlertId")]
         public OutArgument<EntityReference> IoTAlertId { get; set; }
 
-        //[Output("CustomerAssetsId")]
-        //public OutArgument<string> CustomerAssetsId { get; set; }
+        [Output("CustomerAssetsId")]
+        public OutArgument<string> CustomerAssetsId { get; set; }
 
         protected override void Execute(CodeActivityContext executionContext)
         {
@@ -45,9 +44,9 @@ namespace MyCFSWorkflow
                 tracingService.Trace(iotAlertRef.Name, iotAlertRef);
 
 
-                //// Retrieve CustomerAssetsId
-                //var customerAssetsId = iotAlert.Attributes["msdyn_CustomerAsset"].ToString();
-                //CustomerAssetsId.Set(executionContext, customerAssetsId);
+                // Retrieve CustomerAssetsId
+                var customerAssetsId = iotAlert.Attributes["msdyn_CustomerAsset"].ToString();
+                CustomerAssetsId.Set(executionContext, customerAssetsId);
             }
         }
     }
