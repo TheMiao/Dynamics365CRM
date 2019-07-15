@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangeIoTAlertBpfStage.cs" />
     <Compile Include="ContextDepths.cs" />
     <Compile Include="DuplicateCheck.cs" />
     <Compile Include="HelloWorld.cs" />
