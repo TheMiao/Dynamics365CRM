@@ -19,8 +19,9 @@ namespace MyCFSWorkflow
         [Output("IoTAlertId")]
         public OutArgument<EntityReference> IoTAlertId { get; set; }
 
-        [Output("CustomerAssetsId")]
-        public OutArgument<string> CustomerAssetsId { get; set; }
+        [ReferenceTarget("account")]
+        [Output("AccountEntityReference")]
+        public OutArgument<EntityReference> AccountEntityReference { get; set; }
 
         protected override void Execute(CodeActivityContext executionContext)
         {
@@ -46,8 +47,27 @@ namespace MyCFSWorkflow
 
 
                 // Retrieve CustomerAssetsId
-                var customerAssetsId = iotAlert.Attributes["msdyn_CustomerAsset"].ToString();
-                CustomerAssetsId.Set(executionContext, customerAssetsId);
+                var customerAssetsId = iotAlert.Attributes["msdyn_CustomerAsset"];
+                var query = new QueryExpression
+                {
+                    EntityName = "account",
+                    Criteria = new FilterExpression()
+                };
+                query.Criteria.AddCondition("id", ConditionOperator.Equal, customerAssetsId);
+                var assetList = service.RetrieveMultiple(query);
+                if (assetList.Entities.Count <= 1)
+                {
+                    var name = assetList.Entities[0].Attributes["name"].ToString();
+                    var id = assetList.Entities[0].Attributes["id"].ToString();
+
+                    var accountEntRef = new EntityReference("account", new Guid(id))
+                    {
+                        Name = name
+                    };
+                    AccountEntityReference.Set(executionContext, accountEntRef);
+                    tracingService.Trace(accountEntRef.Name, accountEntRef);
+                }
+
             }
         }
     }
