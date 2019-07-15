@@ -29,7 +29,7 @@ var Sdk = window.Sdk || {};
 
             var lookupAccountArray = formContext.getAttribute("parentcustomerid").getValue();
 
-            if (lookupAccountArray !== null && lookupAccountArray[0] != null) {
+            if (lookupAccountArray !== null && lookupAccountArray[0] !== null) {
                 // you will get entity type, name and id
                 var accountGuid = lookupAccountArray[0].id;
                 var accountName = lookupAccountArray[0].name;
@@ -55,9 +55,9 @@ var Sdk = window.Sdk || {};
 
 function RetrieveLookUpValue() {
     var lookupObj = Xrm.Page.getAttribute("xm_productname"); //Check for Lookup Object
-    if (lookupObj != null) {
+    if (lookupObj !== null) {
         var lookupObjValue = lookupObj.getValue();//Check for Lookup Value
-        if (lookupObjValue != null) {
+        if (lookupObjValue !== null) {
             console.log("lookupEntityType" + lookupObjValue[0].xm_productcoding);
             console.log("lookupRecordGuid" + lookupObjValue[0].xm_productmodel);
             console.log("lookupRecordName" + lookupObjValue[0].name);
