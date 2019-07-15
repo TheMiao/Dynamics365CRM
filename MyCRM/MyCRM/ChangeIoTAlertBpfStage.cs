@@ -1,5 +1,6 @@
 ﻿using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.ServiceModel;
@@ -132,6 +133,15 @@ namespace MyCRM
                     LogicalName = "processstage"
                 };
                 RetrievedProcessInstance.Attributes["activestageid"] = nextStageId;
+
+                // Create the Case here
+                var newIncidents = new Entity("incidents");
+                newIncidents.Attributes.Add("incidentid", Guid.NewGuid());
+                newIncidents.Attributes.Add("title", "");
+                var createRequest = new CreateRequest();
+                createRequest.Target = newIncidents;
+                // Link the case with
+
             }
             else if (activeStagePosition == 1 && activeStageName == "Create Work Order")
             {
