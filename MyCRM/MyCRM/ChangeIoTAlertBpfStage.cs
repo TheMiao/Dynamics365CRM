@@ -128,13 +128,6 @@ namespace MyCRM
 
             if (activeStagePosition == 0 && activeStageName == "Created")
             {
-                // create a case here assign the case to the "Create Case" stage
-                var nextStageId = new EntityReference()
-                {
-                    Id = new Guid("ae10c50d-3980-0e80-1293-64672a1e1301"),
-                    Name = "Create Case",
-                    LogicalName = "processstage"
-                };
 
                 // Create the Case here
                 var newIncidents = new Entity("incident");
@@ -180,6 +173,14 @@ namespace MyCRM
                 //createRequest.Target = newIncidents;
                 service.Create(newIncidents);
 
+
+                // create a case here assign the case to the "Create Case" stage
+                var nextStageId = new EntityReference()
+                {
+                    Id = new Guid("ae10c50d-3980-0e80-1293-64672a1e1301"),
+                    Name = "Create Case",
+                    LogicalName = "processstage"
+                };
                 RetrievedProcessInstance.Attributes["activestageid"] = nextStageId;
                 // Link the case with
 
@@ -208,7 +209,7 @@ namespace MyCRM
             }
 
             // Set the next stage as the active stage
-            // service.Update(RetrievedProcessInstance);
+            service.Update(RetrievedProcessInstance);
         }
 
     }
