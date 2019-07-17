@@ -80,8 +80,8 @@ namespace MyCRM
             };
             RetrieveActivePathResponse pathResp = (RetrieveActivePathResponse)service.Execute(pathReq);
 
-            string activeStageName = "";
-            int activeStagePosition = -1;
+            var activeStageName = "";
+            var activeStagePosition = -1;
 
             Console.WriteLine("\nRetrieved stages in the active path of the process instance:");
             for (int i = 0; i < pathResp.ProcessStages.Entities.Count; i++)
@@ -123,9 +123,18 @@ namespace MyCRM
                 }
             }
 
+            //Retrieve Asset's account id
+            var customerAsset = (EntityReference)IotAlert.Attributes["msdyn_customerasset"]; ;
+            var customerAssetIdQuery = new QueryExpression
+            {
+                EntityName = "msdyn_customerasset",
+                ColumnSet = new ColumnSet("msdyn_account", "msdyn_name", "msdyn_customerassetid"),
+                Criteria = new FilterExpression()
+            };
+            customerAssetIdQuery.Criteria.AddCondition("msdyn_customerassetid", ConditionOperator.Equal, customerAsset.Id);
+            var customerAssetIdCollection = service.RetrieveMultiple(customerAssetIdQuery);
 
             // Retrieve the process instance record to update its active stage
-
             if (activeStagePosition == 0 && activeStageName == "Created")
             {
 
@@ -137,15 +146,7 @@ namespace MyCRM
                 newIncidents.Attributes.Add("title", IotAlert.Attributes["msdyn_description"].ToString());
 
                 // Retrieve Customer information from IoT Alert Customer Assets
-                var customerAsset = (EntityReference)IotAlert.Attributes["msdyn_customerasset"]; ;
-                var customerAssetIdQuery = new QueryExpression
-                {
-                    EntityName = "msdyn_customerasset",
-                    ColumnSet = new ColumnSet("msdyn_account", "msdyn_name", "msdyn_customerassetid"),
-                    Criteria = new FilterExpression()
-                };
-                customerAssetIdQuery.Criteria.AddCondition("msdyn_customerassetid", ConditionOperator.Equal, customerAsset.Id);
-                var customerAssetIdCollection = service.RetrieveMultiple(customerAssetIdQuery);
+
                 if (customerAssetIdCollection.Entities.Count <= 1)
                 {
                     var accountER = (EntityReference)customerAssetIdCollection[0].Attributes["msdyn_account"];
@@ -187,6 +188,67 @@ namespace MyCRM
             }
             else if (activeStagePosition == 1 && activeStageName == "Create Work Order")
             {
+                // Create work order
+                var newWorkOrder = new Entity("msdyn_workorder");
+
+                var workOrderQuery = new QueryExpression
+                {
+                    EntityName = "msdyn_workorder",
+                    ColumnSet = new ColumnSet("msdyn_name"),
+                    //Criteria = new FilterExpression()
+                };
+                // workOrderQuery.Criteria.AddCondition("msdyn_customerassetid", ConditionOperator.Equal, customerAsset.Id);
+                var workOrderCollection = service.RetrieveMultiple(workOrderQuery);
+
+                var newWorkOrderGuid = Guid.NewGuid();
+                newWorkOrder.Id = newWorkOrderGuid;
+                newWorkOrder.Attributes.Add("msdyn_workorderid", newWorkOrderGuid);
+
+                newWorkOrder.Attributes.Add("msdyn_name", DateTime.Now.ToString());
+                newWorkOrder.Attributes.Add("msdyn_systemstatus", new OptionSetValue(690970000));
+                if (customerAssetIdCollection.Entities.Count <= 1)
+                {
+                    var accountER = (EntityReference)customerAssetIdCollection[0].Attributes["msdyn_account"];
+
+                    //TODO: need to confirm it is account or contact
+                    newWorkOrder.Attributes.Add("msdyn_serviceaccount", accountER);
+                }
+                else
+                {
+                    //more than one value, need developer to do investigation
+                    return;
+                }
+
+                // Retrieve workorder type
+                var workorderTypeQuery = new QueryExpression
+                {
+                    EntityName = "msdyn_workordertype",
+                    ColumnSet = new ColumnSet("msdyn_name"),
+                };
+                var wokrorderTypeCollection = service.RetrieveMultiple(workorderTypeQuery);
+
+                var workOrderER = new EntityReference();
+                workOrderER.Id = wokrorderTypeCollection[0].Id;
+                workOrderER.LogicalName = wokrorderTypeCollection[0].LogicalName;
+                workOrderER.Name = wokrorderTypeCollection[0].Attributes["msdyn_name"].ToString();
+                newWorkOrder.Attributes.Add("msdyn_workordertype", workOrderER);
+
+                // Retrieve price list
+                var priceListQuery = new QueryExpression
+                {
+                    EntityName = "pricelevel",
+                    ColumnSet = new ColumnSet("pricelevelid", "name")
+                };
+                var priceListCollection = service.RetrieveMultiple(priceListQuery);
+
+                var priceListER = new EntityReference();
+                priceListER.Id = priceListCollection[0].Id;
+                priceListER.LogicalName = priceListCollection[0].LogicalName;
+                priceListER.Name = priceListCollection[0].Attributes["name"].ToString();
+                newWorkOrder.Attributes.Add("msdyn_pricelist", priceListER);
+
+
+                service.Create(newWorkOrder);
                 // create a Work Order here assign the case to the "Create Work Order" stage
                 var nextStageId = new EntityReference()
                 {
