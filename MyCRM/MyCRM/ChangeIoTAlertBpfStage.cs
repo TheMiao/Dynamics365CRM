@@ -10,6 +10,7 @@ namespace MyCRM
     public class ChangeIoTAlertBpfStage : IPlugin
     {
         public Entity RetrievedProcessInstance { get; set; }
+        public Entity IotAlert { get; set; }
 
         public void Execute(IServiceProvider serviceProvider)
         {
@@ -32,11 +33,11 @@ namespace MyCRM
             if (context.InputParameters.Contains("Target") && context.InputParameters["Target"] is Entity)
             {
                 // Obtain the target entity from the input parameters.  
-                Entity ioTAlert = (Entity)context.InputParameters["Target"];
+                IotAlert = (Entity)context.InputParameters["Target"];
 
                 try
                 {
-                    ChangeStage(service, ioTAlert);
+                    ChangeStage(service);
                 }
 
                 catch (FaultException<OrganizationServiceFault> ex)
@@ -51,13 +52,15 @@ namespace MyCRM
                 }
             }
         }
-        public void ChangeStage(IOrganizationService service, Entity ioTAlert)
+
+        public void ChangeStage(IOrganizationService service)
         {
             // Get Process Instances
             var processInstanceRequest = new RetrieveProcessInstancesRequest
             {
-                EntityId = new Guid(ioTAlert.Id.ToString()),
-                EntityLogicalName = ioTAlert.LogicalName.ToString()
+
+                EntityId = new Guid(IotAlert.Id.ToString()),
+                EntityLogicalName = IotAlert.LogicalName.ToString()
             };
 
             var processInstanceResponse = (RetrieveProcessInstancesResponse)service.Execute(processInstanceRequest);
@@ -101,19 +104,19 @@ namespace MyCRM
                 Console.WriteLine("You are at latest stage");
                 return;
             }
-                       
+
             // Retrieve IoT alert Id to match the specific bpf
             var query = new QueryExpression
             {
                 EntityName = "msdyn_bpf_477c16f59170487b8b4dc895c5dcd09b",
-                ColumnSet = new ColumnSet ("bpf_name", "bpf_msdyn_iotalertid", "activestageid")
+                ColumnSet = new ColumnSet("bpf_name", "bpf_msdyn_iotalertid", "activestageid")
             };
             // query.Criteria.AddCondition("processid", ConditionOperator.Equal, activeProcessInstanceID);
             var retrievedProcessInstanceList = service.RetrieveMultiple(query);
             foreach (var entity in retrievedProcessInstanceList.Entities)
             {
-                var ioTAlertER =  (EntityReference)entity.Attributes["bpf_msdyn_iotalertid"];
-                if (ioTAlert.Id == ioTAlertER.Id)
+                var ioTAlertER = (EntityReference)entity.Attributes["bpf_msdyn_iotalertid"];
+                if (IotAlert.Id == ioTAlertER.Id)
                 {
                     RetrievedProcessInstance = entity;
                     break;
@@ -132,14 +135,52 @@ namespace MyCRM
                     Name = "Create Case",
                     LogicalName = "processstage"
                 };
-                RetrievedProcessInstance.Attributes["activestageid"] = nextStageId;
 
                 // Create the Case here
-                var newIncidents = new Entity("incidents");
-                newIncidents.Attributes.Add("incidentid", Guid.NewGuid());
-                newIncidents.Attributes.Add("title", "");
-                var createRequest = new CreateRequest();
-                createRequest.Target = newIncidents;
+                var newIncidents = new Entity("incident");
+                var newGuid = Guid.NewGuid();
+                newIncidents.Id = newGuid;
+                newIncidents.Attributes["incidentid"] = newGuid;
+                newIncidents.Attributes.Add("title", IotAlert.Attributes["msdyn_description"].ToString());
+
+                // Retrieve Customer information from IoT Alert Customer Assets
+                var customerAsset = (EntityReference)IotAlert.Attributes["msdyn_customerasset"]; ;
+                var customerAssetIdQuery = new QueryExpression
+                {
+                    EntityName = "msdyn_customerasset",
+                    ColumnSet = new ColumnSet("msdyn_account", "msdyn_name", "msdyn_customerassetid"),
+                    Criteria = new FilterExpression()
+                };
+                customerAssetIdQuery.Criteria.AddCondition("msdyn_customerassetid", ConditionOperator.Equal, customerAsset.Id);
+                var customerAssetIdCollection = service.RetrieveMultiple(customerAssetIdQuery);
+                if (customerAssetIdCollection.Entities.Count <= 1)
+                {
+                    var accountER = (EntityReference)customerAssetIdCollection[0].Attributes["msdyn_account"];
+
+                    //TODO: need to confirm it is account or contact
+                    newIncidents.Attributes.Add("customerid", accountER);
+                }
+                else
+                {
+                    //more than one value, need developer to do investigation
+                    return;
+                }
+
+                // Retrieve IoT Alert EntityReference
+                var iotAlertER = new EntityReference
+                {
+                    Id = IotAlert.Id,
+                    LogicalName = IotAlert.LogicalName,
+                    Name = IotAlert.Attributes["msdyn_description"].ToString()
+                };
+                newIncidents.Attributes.Add("msdyn_iotalert", iotAlertER);
+
+
+                //var createRequest = new CreateRequest();
+                //createRequest.Target = newIncidents;
+                service.Create(newIncidents);
+
+                RetrievedProcessInstance.Attributes["activestageid"] = nextStageId;
                 // Link the case with
 
             }
@@ -167,7 +208,7 @@ namespace MyCRM
             }
 
             // Set the next stage as the active stage
-            service.Update(RetrievedProcessInstance);
+            // service.Update(RetrievedProcessInstance);
         }
 
     }
