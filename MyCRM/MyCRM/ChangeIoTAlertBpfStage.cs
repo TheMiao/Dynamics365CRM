@@ -11,6 +11,9 @@ namespace MyCRM
     {
         public Entity RetrievedProcessInstance { get; set; }
         public Entity IotAlert { get; set; }
+        public EntityReference PrimaryAssetER { get; set; } = new EntityReference();
+        public EntityReference IoTAlertER { get; set; } = new EntityReference();
+
 
         public void Execute(IServiceProvider serviceProvider)
         {
@@ -115,8 +118,8 @@ namespace MyCRM
             var retrievedProcessInstanceList = service.RetrieveMultiple(query);
             foreach (var entity in retrievedProcessInstanceList.Entities)
             {
-                var ioTAlertER = (EntityReference)entity.Attributes["bpf_msdyn_iotalertid"];
-                if (IotAlert.Id == ioTAlertER.Id)
+                var ioTAlertBpfER = (EntityReference)entity.Attributes["bpf_msdyn_iotalertid"];
+                if (IotAlert.Id == ioTAlertBpfER.Id)
                 {
                     RetrievedProcessInstance = entity;
                     break;
@@ -133,8 +136,33 @@ namespace MyCRM
             };
             customerAssetIdQuery.Criteria.AddCondition("msdyn_customerassetid", ConditionOperator.Equal, customerAsset.Id);
             var customerAssetIdCollection = service.RetrieveMultiple(customerAssetIdQuery);
+            var accountER = new EntityReference();
+            if (customerAssetIdCollection.Entities.Count <= 1)
+            {
+                //TODO: need to confirm it is account or contact
+
+                accountER = (EntityReference)customerAssetIdCollection[0].Attributes["msdyn_account"];
+
+                PrimaryAssetER.Id = customerAssetIdCollection[0].Id;
+                PrimaryAssetER.LogicalName = customerAssetIdCollection[0].LogicalName;
+                PrimaryAssetER.Name = customerAssetIdCollection[0].Attributes["msdyn_name"].ToString();
+            }
+            else
+            {
+                //more than one value, need developer to do investigation
+                return;
+            }
+
+            // Retrieve IoT Alert EntityReference
+            IoTAlertER.Id = IotAlert.Id;
+            IoTAlertER.LogicalName = IotAlert.LogicalName;
+            IoTAlertER.Name = IotAlert.Attributes["msdyn_description"].ToString();
 
             // Retrieve the process instance record to update its active stage
+            activeStagePosition = 1;
+            //activeStageName = "Schedule Work Order";
+            activeStageName = "Create Work Order";
+
             if (activeStagePosition == 0 && activeStageName == "Created")
             {
 
@@ -146,28 +174,11 @@ namespace MyCRM
                 newIncidents.Attributes.Add("title", IotAlert.Attributes["msdyn_description"].ToString());
 
                 // Retrieve Customer information from IoT Alert Customer Assets
+                newIncidents.Attributes.Add("customerid", accountER);
 
-                if (customerAssetIdCollection.Entities.Count <= 1)
-                {
-                    var accountER = (EntityReference)customerAssetIdCollection[0].Attributes["msdyn_account"];
 
-                    //TODO: need to confirm it is account or contact
-                    newIncidents.Attributes.Add("customerid", accountER);
-                }
-                else
-                {
-                    //more than one value, need developer to do investigation
-                    return;
-                }
 
-                // Retrieve IoT Alert EntityReference
-                var iotAlertER = new EntityReference
-                {
-                    Id = IotAlert.Id,
-                    LogicalName = IotAlert.LogicalName,
-                    Name = IotAlert.Attributes["msdyn_description"].ToString()
-                };
-                newIncidents.Attributes.Add("msdyn_iotalert", iotAlertER);
+                newIncidents.Attributes.Add("msdyn_iotalert", IoTAlertER);
 
 
                 //var createRequest = new CreateRequest();
@@ -191,14 +202,14 @@ namespace MyCRM
                 // Create work order
                 var newWorkOrder = new Entity("msdyn_workorder");
 
-                var workOrderQuery = new QueryExpression
-                {
-                    EntityName = "msdyn_workorder",
-                    ColumnSet = new ColumnSet("msdyn_name"),
-                    //Criteria = new FilterExpression()
-                };
-                // workOrderQuery.Criteria.AddCondition("msdyn_customerassetid", ConditionOperator.Equal, customerAsset.Id);
-                var workOrderCollection = service.RetrieveMultiple(workOrderQuery);
+                //var workOrderQuery = new QueryExpression
+                //{
+                //    EntityName = "msdyn_workorder",
+                //    ColumnSet = new ColumnSet("msdyn_name"),
+                //    //Criteria = new FilterExpression()
+                //};
+                //// workOrderQuery.Criteria.AddCondition("msdyn_customerassetid", ConditionOperator.Equal, customerAsset.Id);
+                //var workOrderCollection = service.RetrieveMultiple(workOrderQuery);
 
                 var newWorkOrderGuid = Guid.NewGuid();
                 newWorkOrder.Id = newWorkOrderGuid;
@@ -206,18 +217,36 @@ namespace MyCRM
 
                 newWorkOrder.Attributes.Add("msdyn_name", DateTime.Now.ToString());
                 newWorkOrder.Attributes.Add("msdyn_systemstatus", new OptionSetValue(690970000));
-                if (customerAssetIdCollection.Entities.Count <= 1)
-                {
-                    var accountER = (EntityReference)customerAssetIdCollection[0].Attributes["msdyn_account"];
+                newWorkOrder.Attributes.Add("msdyn_serviceaccount", accountER);
 
-                    //TODO: need to confirm it is account or contact
-                    newWorkOrder.Attributes.Add("msdyn_serviceaccount", accountER);
-                }
-                else
+                // Retrieve Primary Incident details
+                // TODO: Will hard code here for demo purpose, we could search out the incident type by current IoT Alert type.
+                // Primary Incident Type
+                var incidentTypeQuery = new QueryExpression
                 {
-                    //more than one value, need developer to do investigation
-                    return;
+                    EntityName = "msdyn_incidenttype",
+                    ColumnSet = new ColumnSet("msdyn_name", "msdyn_estimatedduration"),
+                    Criteria = new FilterExpression()
+                };
+                incidentTypeQuery.Criteria.AddCondition("msdyn_name", ConditionOperator.Equal, "Unit Overheating");
+                var incidentTypeCollection = service.RetrieveMultiple(incidentTypeQuery);
+                var incidentTypeER = new EntityReference();
+                var estimatedDuration = 0;
+                if (incidentTypeCollection.Entities.Count <= 1)
+                {
+                    incidentTypeER.Id = incidentTypeCollection.Entities[0].Id;
+                    incidentTypeER.LogicalName = incidentTypeCollection.Entities[0].LogicalName;
+                    incidentTypeER.Name = incidentTypeCollection.Entities[0].Attributes["msdyn_name"].ToString();
+                    int.TryParse(incidentTypeCollection.Entities[0].Attributes["msdyn_estimatedduration"].ToString(), out estimatedDuration);
                 }
+                newWorkOrder.Attributes.Add("msdyn_primaryincidenttype", incidentTypeER);
+                // Primary Incident Estimated Duration
+                newWorkOrder.Attributes.Add("msdyn_primaryincidentestimatedduration", estimatedDuration);
+                // IoT Alert
+                newWorkOrder.Attributes.Add("msdyn_iotalert", IoTAlertER);
+                // Primary Incident Customer Asset
+                newWorkOrder.Attributes.Add("msdyn_customerasset", PrimaryAssetER);
+
 
                 // Retrieve workorder type
                 var workorderTypeQuery = new QueryExpression
@@ -260,6 +289,27 @@ namespace MyCRM
             }
             else if (activeStagePosition == 2 && activeStageName == "Schedule Work Order")
             {
+                var workOrderQuery = new QueryExpression
+                {
+                    EntityName = "bookableresourcebooking",
+                    ColumnSet = new ColumnSet("name"),
+                    //Criteria = new FilterExpression()
+                };
+                // workOrderQuery.Criteria.AddCondition("msdyn_customerassetid", ConditionOperator.Equal, customerAsset.Id);
+                var workOrderCollection = service.RetrieveMultiple(workOrderQuery);
+
+                // Create Bookings
+                var newBooking = new Entity("bookableresourcebooking");
+
+                // TODO: We can have better schedule the Start and End Time depending on the location and the time schdule of Assigned Resource (Engineer)
+                // Current schedule is hard coded
+                var newBookingGuid = Guid.NewGuid();
+                newBooking.Attributes.Add("bookableresourcebookingid", newBooking);
+                newBooking.Attributes.Add("name", "IoT Alert" + DateTime.Now.ToShortDateString());
+                newBooking.Attributes.Add("starttime", DateTimeOffset.Now.AddDays(1));
+                newBooking.Attributes.Add("endtime", DateTimeOffset.Now.AddDays(1).AddHours(2));
+
+                // service.Create(newBooking);
                 // create a Work Order here assign the case to the "Schedule Work Order" Stage
                 var nextStageId = new EntityReference()
                 {
@@ -271,7 +321,7 @@ namespace MyCRM
             }
 
             // Set the next stage as the active stage
-            service.Update(RetrievedProcessInstance);
+            // service.Update(RetrievedProcessInstance);
         }
 
     }
