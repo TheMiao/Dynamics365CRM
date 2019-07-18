@@ -294,9 +294,10 @@ namespace MyCRM
                     EntityName = "bookableresourcebooking",
                     ColumnSet = new ColumnSet("name"),
                     //Criteria = new FilterExpression()
-                };
+                }; 
                 // workOrderQuery.Criteria.AddCondition("msdyn_customerassetid", ConditionOperator.Equal, customerAsset.Id);
                 var workOrderCollection = service.RetrieveMultiple(workOrderQuery);
+
 
                 // Create Bookings
                 var newBooking = new Entity("bookableresourcebooking");
@@ -308,6 +309,56 @@ namespace MyCRM
                 newBooking.Attributes.Add("name", "IoT Alert" + DateTime.Now.ToShortDateString());
                 newBooking.Attributes.Add("starttime", DateTimeOffset.Now.AddDays(1));
                 newBooking.Attributes.Add("endtime", DateTimeOffset.Now.AddDays(1).AddHours(2));
+                // Duration
+                var incidentTypeQuery = new QueryExpression
+                {
+                    EntityName = "msdyn_incidenttype",
+                    ColumnSet = new ColumnSet("msdyn_name", "msdyn_estimatedduration"),
+                    Criteria = new FilterExpression()
+                };
+                incidentTypeQuery.Criteria.AddCondition("msdyn_name", ConditionOperator.Equal, "Unit Overheating");
+                var incidentTypeCollection = service.RetrieveMultiple(incidentTypeQuery);
+                var estimatedDuration = 0;
+                if (incidentTypeCollection.Entities.Count <= 1)
+                {
+                    int.TryParse(incidentTypeCollection.Entities[0].Attributes["msdyn_estimatedduration"].ToString(), out estimatedDuration);
+                }
+                newBooking.Attributes.Add("duration", estimatedDuration);
+
+                // Resource
+                var bookableresourceQuery = new QueryExpression
+                {
+                    EntityName = "bookableresource",
+                    ColumnSet = new ColumnSet("name"),
+                    Criteria = new FilterExpression()
+                };
+                bookableresourceQuery.Criteria.AddCondition("bookableresourceid", ConditionOperator.Equal, "19f73bd9-17f3-e611-8112-e0071b66bf01");
+                var bookableResourceCollection = service.RetrieveMultiple(bookableresourceQuery);
+                var bookableResourceER = new EntityReference();
+                bookableResourceER.Id = bookableResourceCollection.Entities[0].Id;
+                bookableResourceER.LogicalName = bookableResourceCollection.Entities[0].LogicalName;
+                bookableResourceER.Name = bookableResourceCollection.Entities[0].Attributes["name"].ToString();
+                newBooking.Attributes.Add("bookableresource", bookableResourceER);
+
+                // Booking Status
+                var bookingStatusQuery = new QueryExpression
+                {
+                    EntityName = "bookingstatus",
+                    ColumnSet = new ColumnSet("name"),
+                    Criteria = new FilterExpression()
+                };
+                bookingStatusQuery.Criteria.AddCondition("bookingstatusid", ConditionOperator.Equal, "f16d80d1-fd07-4237-8b69-187a11eb75f9");
+                var bookingStatusCollection = service.RetrieveMultiple(bookingStatusQuery);
+                var bookingStatusER = new EntityReference();
+                bookingStatusER.Id = bookingStatusCollection.Entities[0].Id;
+                bookingStatusER.LogicalName = bookingStatusCollection.Entities[0].LogicalName;
+                bookingStatusER.Name = bookingStatusCollection.Entities[0].Attributes["name"].ToString();
+                newBooking.Attributes.Add("bookingstatus", bookingStatusER);
+
+                newBooking.Attributes.Add("bookingtype", new OptionSetValue(2));
+
+                // Resource Requirement. It is 
+                
 
                 // service.Create(newBooking);
                 // create a Work Order here assign the case to the "Schedule Work Order" Stage
