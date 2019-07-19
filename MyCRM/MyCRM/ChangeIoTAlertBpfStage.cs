@@ -13,7 +13,7 @@ namespace MyCRM
         public Entity IotAlert { get; set; }
         public EntityReference PrimaryAssetER { get; set; } = new EntityReference();
         public EntityReference IoTAlertER { get; set; } = new EntityReference();
-
+        public Entity NewWorkOrder { get; set; }
 
         public void Execute(IServiceProvider serviceProvider)
         {
@@ -159,9 +159,9 @@ namespace MyCRM
             IoTAlertER.Name = IotAlert.Attributes["msdyn_description"].ToString();
 
             // Retrieve the process instance record to update its active stage
-            activeStagePosition = 1;
-            //activeStageName = "Schedule Work Order";
-            activeStageName = "Create Work Order";
+            activeStagePosition = 2;
+            activeStageName = "Schedule Work Order";
+            // activeStageName = "Create Work Order";
 
             if (activeStagePosition == 0 && activeStageName == "Created")
             {
@@ -200,7 +200,7 @@ namespace MyCRM
             else if (activeStagePosition == 1 && activeStageName == "Create Work Order")
             {
                 // Create work order
-                var newWorkOrder = new Entity("msdyn_workorder");
+                NewWorkOrder = new Entity("msdyn_workorder");
 
                 //var workOrderQuery = new QueryExpression
                 //{
@@ -212,12 +212,12 @@ namespace MyCRM
                 //var workOrderCollection = service.RetrieveMultiple(workOrderQuery);
 
                 var newWorkOrderGuid = Guid.NewGuid();
-                newWorkOrder.Id = newWorkOrderGuid;
-                newWorkOrder.Attributes.Add("msdyn_workorderid", newWorkOrderGuid);
+                NewWorkOrder.Id = newWorkOrderGuid;
+                NewWorkOrder.Attributes.Add("msdyn_workorderid", newWorkOrderGuid);
 
-                newWorkOrder.Attributes.Add("msdyn_name", DateTime.Now.ToString());
-                newWorkOrder.Attributes.Add("msdyn_systemstatus", new OptionSetValue(690970000));
-                newWorkOrder.Attributes.Add("msdyn_serviceaccount", accountER);
+                NewWorkOrder.Attributes.Add("msdyn_name", DateTime.Now.ToString());
+                NewWorkOrder.Attributes.Add("msdyn_systemstatus", new OptionSetValue(690970000));
+                NewWorkOrder.Attributes.Add("msdyn_serviceaccount", accountER);
 
                 // Retrieve Primary Incident details
                 // TODO: Will hard code here for demo purpose, we could search out the incident type by current IoT Alert type.
@@ -239,13 +239,13 @@ namespace MyCRM
                     incidentTypeER.Name = incidentTypeCollection.Entities[0].Attributes["msdyn_name"].ToString();
                     int.TryParse(incidentTypeCollection.Entities[0].Attributes["msdyn_estimatedduration"].ToString(), out estimatedDuration);
                 }
-                newWorkOrder.Attributes.Add("msdyn_primaryincidenttype", incidentTypeER);
+                NewWorkOrder.Attributes.Add("msdyn_primaryincidenttype", incidentTypeER);
                 // Primary Incident Estimated Duration
-                newWorkOrder.Attributes.Add("msdyn_primaryincidentestimatedduration", estimatedDuration);
+                NewWorkOrder.Attributes.Add("msdyn_primaryincidentestimatedduration", estimatedDuration);
                 // IoT Alert
-                newWorkOrder.Attributes.Add("msdyn_iotalert", IoTAlertER);
+                NewWorkOrder.Attributes.Add("msdyn_iotalert", IoTAlertER);
                 // Primary Incident Customer Asset
-                newWorkOrder.Attributes.Add("msdyn_customerasset", PrimaryAssetER);
+                NewWorkOrder.Attributes.Add("msdyn_customerasset", PrimaryAssetER);
 
 
                 // Retrieve workorder type
@@ -255,12 +255,13 @@ namespace MyCRM
                     ColumnSet = new ColumnSet("msdyn_name"),
                 };
                 var wokrorderTypeCollection = service.RetrieveMultiple(workorderTypeQuery);
-
-                var workOrderER = new EntityReference();
-                workOrderER.Id = wokrorderTypeCollection[0].Id;
-                workOrderER.LogicalName = wokrorderTypeCollection[0].LogicalName;
-                workOrderER.Name = wokrorderTypeCollection[0].Attributes["msdyn_name"].ToString();
-                newWorkOrder.Attributes.Add("msdyn_workordertype", workOrderER);
+                var workOrderTypeER = new EntityReference
+                {
+                    Id = wokrorderTypeCollection[0].Id,
+                    LogicalName = wokrorderTypeCollection[0].LogicalName,
+                    Name = wokrorderTypeCollection[0].Attributes["msdyn_name"].ToString()
+                };
+                NewWorkOrder.Attributes.Add("msdyn_workordertype", workOrderTypeER);
 
                 // Retrieve price list
                 var priceListQuery = new QueryExpression
@@ -274,10 +275,10 @@ namespace MyCRM
                 priceListER.Id = priceListCollection[0].Id;
                 priceListER.LogicalName = priceListCollection[0].LogicalName;
                 priceListER.Name = priceListCollection[0].Attributes["name"].ToString();
-                newWorkOrder.Attributes.Add("msdyn_pricelist", priceListER);
+                NewWorkOrder.Attributes.Add("msdyn_pricelist", priceListER);
 
 
-                service.Create(newWorkOrder);
+                service.Create(NewWorkOrder);
                 // create a Work Order here assign the case to the "Create Work Order" stage
                 var nextStageId = new EntityReference()
                 {
@@ -289,14 +290,14 @@ namespace MyCRM
             }
             else if (activeStagePosition == 2 && activeStageName == "Schedule Work Order")
             {
-                var workOrderQuery = new QueryExpression
-                {
-                    EntityName = "bookableresourcebooking",
-                    ColumnSet = new ColumnSet("name"),
-                    //Criteria = new FilterExpression()
-                }; 
-                // workOrderQuery.Criteria.AddCondition("msdyn_customerassetid", ConditionOperator.Equal, customerAsset.Id);
-                var workOrderCollection = service.RetrieveMultiple(workOrderQuery);
+                //var workOrderQuery = new QueryExpression
+                //{
+                //    EntityName = "bookableresourcebooking",
+                //    ColumnSet = new ColumnSet("name"),
+                //    //Criteria = new FilterExpression()
+                //}; 
+                //// workOrderQuery.Criteria.AddCondition("msdyn_customerassetid", ConditionOperator.Equal, customerAsset.Id);
+                //var workOrderCollection = service.RetrieveMultiple(workOrderQuery);
 
 
                 // Create Bookings
@@ -305,10 +306,11 @@ namespace MyCRM
                 // TODO: We can have better schedule the Start and End Time depending on the location and the time schdule of Assigned Resource (Engineer)
                 // Current schedule is hard coded
                 var newBookingGuid = Guid.NewGuid();
-                newBooking.Attributes.Add("bookableresourcebookingid", newBooking);
-                newBooking.Attributes.Add("name", "IoT Alert" + DateTime.Now.ToShortDateString());
-                newBooking.Attributes.Add("starttime", DateTimeOffset.Now.AddDays(1));
-                newBooking.Attributes.Add("endtime", DateTimeOffset.Now.AddDays(1).AddHours(2));
+                newBooking.Attributes.Add("bookableresourcebookingid", newBookingGuid);
+                newBooking.Id = newBookingGuid;
+                newBooking.Attributes.Add("name", "IoT Alert" + DateTimeOffset.UtcNow);
+                newBooking.Attributes.Add("starttime", DateTimeOffset.Now.AddDays(1).UtcDateTime);
+                newBooking.Attributes.Add("endtime", DateTimeOffset.Now.AddDays(1).AddHours(2).UtcDateTime);
                 // Duration
                 var incidentTypeQuery = new QueryExpression
                 {
@@ -338,7 +340,7 @@ namespace MyCRM
                 bookableResourceER.Id = bookableResourceCollection.Entities[0].Id;
                 bookableResourceER.LogicalName = bookableResourceCollection.Entities[0].LogicalName;
                 bookableResourceER.Name = bookableResourceCollection.Entities[0].Attributes["name"].ToString();
-                newBooking.Attributes.Add("bookableresource", bookableResourceER);
+                newBooking.Attributes.Add("resource", bookableResourceER);
 
                 // Booking Status
                 var bookingStatusQuery = new QueryExpression
@@ -357,10 +359,22 @@ namespace MyCRM
 
                 newBooking.Attributes.Add("bookingtype", new OptionSetValue(2));
 
-                // Resource Requirement. It is 
-                
+                // Resource Requirement. It is msdyn_resourcerequirement not msdyn_workorder
+                var resourceRequirementQuery = new QueryExpression
+                {
+                    EntityName = "msdyn_resourcerequirement",
+                    ColumnSet = new ColumnSet("msdyn_name"),
+                    Criteria = new FilterExpression()
+                };
+                resourceRequirementQuery.Criteria.AddCondition("msdyn_workorder", ConditionOperator.Equal, "48feaa78-424b-4519-80ff-4ac2212c5e79");
+                var resourceRequiremenCollection = service.RetrieveMultiple(resourceRequirementQuery);
+                var resourceRequirementER = new EntityReference();
+                resourceRequirementER.Id = resourceRequiremenCollection.Entities[0].Id;
+                resourceRequirementER.LogicalName = resourceRequiremenCollection.Entities[0].LogicalName;
+                resourceRequirementER.Name = resourceRequiremenCollection.Entities[0].Attributes["msdyn_name"].ToString();
+                newBooking.Attributes.Add("msdyn_resourcerequirement", resourceRequirementER);
 
-                // service.Create(newBooking);
+                service.Create(newBooking);
                 // create a Work Order here assign the case to the "Schedule Work Order" Stage
                 var nextStageId = new EntityReference()
                 {
