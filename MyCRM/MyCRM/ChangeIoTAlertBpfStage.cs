@@ -40,6 +40,7 @@ namespace MyCRM
 
                 try
                 {
+                    SendCommand(service, IotAlert);
                     ChangeStage(service);
                 }
 
@@ -389,5 +390,25 @@ namespace MyCRM
             // service.Update(RetrievedProcessInstance);
         }
 
+
+        public void SendCommand(IOrganizationService service, Entity iotAlert)
+        {
+            /* Method Function
+             * 
+             * The SendCommand method will include the following functions
+             * 1. When the high temperature IoT Alert created, send reboot command
+             * 2. If the high temperature IoT Alert created again in 5 minutes, start the ChangeStage function
+             * 
+             */
+
+            // Retrieve IoT Alert
+            var iotAlertQuery = new QueryExpression
+            {
+                EntityName = "msdyn_iotalert",
+                ColumnSet = new ColumnSet("msdyn_description", "createdon", "msdyn_customerasset")
+            };
+            iotAlertQuery.Criteria.AddCondition("msdyn_iotalertid", ConditionOperator.Equal, iotAlert.Id);
+            var iotAlertCollection = service.RetrieveMultiple(iotAlertQuery);
+        }
     }
 }
