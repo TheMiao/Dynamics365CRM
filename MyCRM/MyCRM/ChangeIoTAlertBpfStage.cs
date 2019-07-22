@@ -38,10 +38,15 @@ namespace MyCRM
                 // Obtain the target entity from the input parameters.  
                 IotAlert = (Entity)context.InputParameters["Target"];
 
+                // Retrieve IoT Alert EntityReference
+                IoTAlertER.Id = IotAlert.Id;
+                IoTAlertER.LogicalName = IotAlert.LogicalName;
+                IoTAlertER.Name = IotAlert.Attributes["msdyn_description"].ToString();
+
                 try
                 {
-                    SendCommand(service, IotAlert);
-                    ChangeStage(service);
+                    SendCommand(service);
+                    //ChangeStage(service);
                 }
 
                 catch (FaultException<OrganizationServiceFault> ex)
@@ -153,11 +158,6 @@ namespace MyCRM
                 //more than one value, need developer to do investigation
                 return;
             }
-
-            // Retrieve IoT Alert EntityReference
-            IoTAlertER.Id = IotAlert.Id;
-            IoTAlertER.LogicalName = IotAlert.LogicalName;
-            IoTAlertER.Name = IotAlert.Attributes["msdyn_description"].ToString();
 
             // Retrieve the process instance record to update its active stage
             activeStagePosition = 2;
@@ -391,7 +391,7 @@ namespace MyCRM
         }
 
 
-        public void SendCommand(IOrganizationService service, Entity iotAlert)
+        public void SendCommand(IOrganizationService service)
         {
             /* Method Function
              * 
@@ -407,8 +407,52 @@ namespace MyCRM
                 EntityName = "msdyn_iotalert",
                 ColumnSet = new ColumnSet("msdyn_description", "createdon", "msdyn_customerasset")
             };
-            iotAlertQuery.Criteria.AddCondition("msdyn_iotalertid", ConditionOperator.Equal, iotAlert.Id);
+            iotAlertQuery.Criteria.AddCondition("msdyn_iotalertid", ConditionOperator.Equal, IotAlert.Id);
             var iotAlertCollection = service.RetrieveMultiple(iotAlertQuery);
+
+            foreach (var item in iotAlertCollection.Entities)
+            {
+                // condition, matching the situation now, first iot alert or more than once.
+                var itemIotAlertCustomerAsset = item.Attributes["msdyn_customerasset"].ToString().ToLower();
+                var currentIotAlertCustomerAsset = IotAlert.Attributes["msdyn_customerasset"].ToString().ToLower();
+                var itemIotAlertAssetCreateTime = (DateTime)item.Attributes["createdon"];
+                var currentIotAlertCreateTime = (DateTime)item.Attributes["createdon"];
+
+                var test = DateTime.Compare(currentIotAlertCreateTime, itemIotAlertAssetCreateTime);
+                if (DateTimeOffset.Compare(currentIotAlertCreateTime,itemIotAlertAssetCreateTime) > 5)
+                {
+                    CreateCommand(service);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            
+        }
+
+        public void CreateCommand(IOrganizationService service)
+        {
+            Entity newCommand = new Entity("msdyn_iotdevicecommand");
+            var newCommandGuid = Guid.NewGuid();
+            newCommand.Id = newCommandGuid;
+            newCommand.Attributes.Add("msdyn_iotdevicecommandid", newCommandGuid);
+            newCommand.Attributes.Add("msdyn_name", "Reset to Default from Plugin");
+            newCommand.Attributes.Add("statecode", 0);
+            newCommand.Attributes.Add("statuscode", 1);
+            newCommand.Attributes.Add("msdyn_deviceid", IotAlert.Attributes["msdyn_deviceid"].ToString());
+            newCommand.Attributes.Add("versionnumber", 1234567);
+            newCommand.Attributes.Add("createdon", DateTime.UtcNow);
+            newCommand.Attributes.Add("msdyn_message", "{\"CommandName\":\"Reset Thermostat\",\"Parameters\":\"\"}");
+            newCommand.Attributes.Add("msdyn_commandstatus", new OptionSetValue(192350000));
+            newCommand.Attributes.Add("msdyn_sendtoallconnecteddevices", false);
+            newCommand.Attributes.Add("msdyn_customerasset", (EntityReference)IotAlert.Attributes["msdyn_customerasset"]);
+            newCommand.Attributes.Add("msdyn_device", (EntityReference)IotAlert.Attributes["msdyn_device"]);
+            newCommand.Attributes.Add("msdyn_parentalert", IoTAlertER);
+
+            service.Create(newCommand);
+            //CreateRequest createRequest = new CreateRequest();
+            //createRequest.Target = newCommand;
         }
     }
 }
