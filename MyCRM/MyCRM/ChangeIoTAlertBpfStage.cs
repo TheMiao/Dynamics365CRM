@@ -45,7 +45,11 @@ namespace MyCRM
 
                 try
                 {
-                    SendCommand(service);
+                    var sendCommandResult = SendCommand(service);
+                    if (sendCommandResult)
+                    {
+                        CloseCurrentIotAlert(service);
+                    }
                     //ChangeStage(service);
                 }
 
@@ -391,7 +395,7 @@ namespace MyCRM
         }
 
 
-        public void SendCommand(IOrganizationService service)
+        public bool SendCommand(IOrganizationService service)
         {
             /* Method Function
              * 
@@ -425,10 +429,10 @@ namespace MyCRM
                 }
                 else
                 {
-                    break;
+                    return false;
                 }
             }
-            
+            return true;
         }
 
         public void CreateCommand(IOrganizationService service)
@@ -451,6 +455,11 @@ namespace MyCRM
             newCommand.Attributes.Add("msdyn_parentalert", IoTAlertER);
 
             service.Create(newCommand);
+        }
+        public void CloseCurrentIotAlert(IOrganizationService service)
+        {
+            IotAlert.Attributes["statecode"] = 2;
+            service.Update(IotAlert);
         }
     }
 }
