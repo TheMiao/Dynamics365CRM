@@ -451,8 +451,6 @@ namespace MyCRM
             newCommand.Attributes.Add("msdyn_parentalert", IoTAlertER);
 
             service.Create(newCommand);
-            //CreateRequest createRequest = new CreateRequest();
-            //createRequest.Target = newCommand;
         }
     }
 }
