@@ -422,7 +422,6 @@ namespace MyCRM
                 var itemIotAlertAssetCreateTime = (DateTime)item.Attributes["createdon"];
                 var currentIotAlertCreateTime = (DateTime)item.Attributes["createdon"];
 
-                var test = DateTime.Compare(currentIotAlertCreateTime, itemIotAlertAssetCreateTime);
                 if (DateTimeOffset.Compare(currentIotAlertCreateTime,itemIotAlertAssetCreateTime) > 5)
                 {
                     CreateCommand(service);
