@@ -412,10 +412,10 @@ namespace MyCRM
                 // condition, matching the situation now, first iot alert or more than once.
                 var itemIotAlertCustomerAsset = item.Attributes["msdyn_customerasset"].ToString().ToLower();
                 var currentIotAlertCustomerAsset = IotAlert.Attributes["msdyn_customerasset"].ToString().ToLower();
-                var itemIotAlertAssetCreateTime = (DateTime)item.Attributes["createdon"];
-                var currentIotAlertCreateTime = (DateTime)item.Attributes["createdon"];
+                var itemIotAlertAssetCreateTime = (DateTimeOffset)item.Attributes["createdon"];
+                var currentIotAlertCreateTime = (DateTimeOffset)IotAlert.Attributes["createdon"];
 
-                if (DateTimeOffset.Compare(currentIotAlertCreateTime, itemIotAlertAssetCreateTime) < 0)
+                if (DateTimeOffset.Compare(currentIotAlertCreateTime, itemIotAlertAssetCreateTime) > 0)
                 {
                     CreateCommand(service);
                 }
