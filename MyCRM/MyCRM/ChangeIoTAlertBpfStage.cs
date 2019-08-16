@@ -46,12 +46,19 @@ namespace MyCRM
 
                 try
                 {
-                    var sendCommandResult = SendCommand(service);
-                    if (sendCommandResult)
-                    {
-                        CloseCurrentIotAlert(service);
-                    }
+                    
+                    CreateCommand(service);
+                    ChangeStage(service);
+                    //CreateWorkOrder(service);
+                    //ScheduleWorkOrder(service);
+                    // TODO: comment out for demo purpose
+                    //var sendCommandResult = SendCommand(service);
+                    //if (sendCommandResult)
+                    //{
+                    //    CloseCurrentIotAlert(service);
+                    //}
                     //ChangeStage(service);
+
                 }
 
                 catch (FaultException<OrganizationServiceFault> ex)
@@ -172,7 +179,7 @@ namespace MyCRM
             ScheduleWorkOrder(service);
 
             // Set the next stage as the active stage
-            service.Update(RetrievedProcessInstance);
+            // service.Update(RetrievedProcessInstance);
         }
 
 
