@@ -46,7 +46,7 @@ namespace MyCRM
 
                 try
                 {
-                    
+
                     CreateCommand(service);
                     ChangeStage(service);
                     //CreateWorkOrder(service);
