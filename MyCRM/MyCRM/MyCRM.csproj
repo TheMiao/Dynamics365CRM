@@ -67,6 +67,7 @@
     <Compile Include="HelloWorld.cs" />
     <Compile Include="PreEntityImageDemo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PSA-Demo.cs" />
     <Compile Include="RetrieveCustomEntities.cs" />
     <Compile Include="SharedVariables.cs" />
     <Compile Include="TaskCreate.cs" />
