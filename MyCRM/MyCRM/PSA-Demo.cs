@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyCRM
 {
-    class PSA_Demo
+    public class PSA_Demo
     {
     }
 }
