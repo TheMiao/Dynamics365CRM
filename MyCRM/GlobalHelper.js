@@ -11,7 +11,7 @@ var Helper = window.Helper || {};
         };
 
         this.DoSomething = function (executionContext) {
-            alert("Hello World from GlobalHelper")
-        }
+            alert("Hello World from GlobalHelper");
+        };
     }
 ).call(Helper); 
