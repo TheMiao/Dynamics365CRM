@@ -10,20 +10,20 @@ var Sdk = window.Sdk || {};
 
             var formType = formContext.ui.getFormType();
 
-            if (formType == 1) {
+            if (formType === 1) {
                 formContext.ui.setFormNotification("User is creating account ", "Info", "notification1");
 
-            } else if (formType == 2) {
+            } else if (formType === 2) {
                 formContext.ui.setFormNotification("User is opening account", "Info", "notification1");
 
-            } else if (formType == 3) {
+            } else if (formType === 3) {
                 formContext.ui.setFormNotification("User doesn't have permission to edit the record", "Info", "notification1");
             }
         };
 
         this.formOnSave = function (executionContext) {
             var eventArgs = executionContext.getEventArgs();
-            if (eventArgs.getSaveMode() == 70 || eventArgs.getSaveMode() == 2) {
+            if (eventArgs.getSaveMode() === 70 || eventArgs.getSaveMode() === 2) {
                 eventArgs.preventDefault();
             }
         };
