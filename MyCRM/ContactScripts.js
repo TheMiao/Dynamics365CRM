@@ -13,6 +13,9 @@ function EmailOnChange() {
 function DisplayHelloWorld(executionContext) {
     var formContext = executionContext.getFormContext();
 
+    // var firstName = formContext.data.entity.attributes.get("firstname").getValue();
+
+    // this is shortcut
     var firstName = formContext.getAttribute("firstname").getValue();
 
     alert("Hello World " + firstName);
